@@ -32,9 +32,8 @@ import Bist from "./../models/Bist.js";
 // };
 
 export const bistPrices = async (req, res) => {
-  const hisse = req.params.id;
   try {
-    const bist = await Bist.find();
+    const bist = await Bist.find().sort("hisse");
     res.status(200).json(bist);
   } catch (err) {
     res.status(404).json({ message: err.message });
@@ -140,14 +139,14 @@ export const updatePrices = async (req, res) => {
         `https://bigpara.hurriyet.com.tr/api/v1/borsa/hisseyuzeysel/${symbol}`
       );
       if (response.status === 200) {
-        const { satis, yuzdedegisim, sembol, aciklama } =
+        const { alis, satis, yuzdedegisim, sembol, aciklama } =
           response.data.data.hisseYuzeysel;
         console.log(satis, yuzdedegisim, aciklama);
         await Bist.findOneAndReplace(
           { hisse: symbol },
           {
             hisse: sembol,
-            fiyat: Number(satis),
+            fiyat: Number(satis) > 0 ? Number(satis) : Number(alis),
             change: Number(yuzdedegisim),
             isim: aciklama,
           }

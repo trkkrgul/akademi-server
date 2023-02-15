@@ -11,6 +11,6 @@ router.get("/", (req, res) => {
 });
 router.get("/prices", bistPrices);
 router.get("/prices/:id", specificBist);
-router.get("/updateprices", updatePrices);
+router.patch("/updateprices", updatePrices);
 
 export default router;
