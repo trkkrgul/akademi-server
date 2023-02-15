@@ -133,6 +133,24 @@ app.get("/uploads/:id", async (req, res) => {
     });
     res.end(results);
   } catch (err) {
+    console.log(err);
+    res.status(404).json({ message: "Image doesnt exists" });
+  }
+});
+
+app.get("/videoUploads/:id", async (req, res) => {
+  try {
+    const imageLink = req.params.id;
+    const results = await s3getv3(imageLink);
+
+    console.log(results);
+    res.writeHead(200, {
+      "Content-Type": `video/mp4`,
+      "Content-Length": results.length,
+    });
+    res.end(results);
+  } catch (err) {
+    console.log(err);
     res.status(404).json({ message: "Image doesnt exists" });
   }
 });
