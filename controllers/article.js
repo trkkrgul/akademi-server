@@ -1,4 +1,4 @@
-import e from "express";
+import express from "express";
 import Article from "../models/Article.js";
 import User from "../models/User.js";
 
@@ -47,14 +47,13 @@ export const getArticlesById = async (req, res) => {
   try {
     const { articleId } = req.params;
 
-    const result = await Article.findOne({ _id: articleId }).lean();
+    const result = await Article.findById(articleId);
 
     const user = await User.findById(result.userId);
     console.log(result);
 
     const article = {
-      ...result,
-      views: result.views.length,
+      ...result._doc,
       firstname: user.firstName,
       lastname: user.lastName,
       userAvatar: user.picturePath,
@@ -67,11 +66,13 @@ export const getArticlesById = async (req, res) => {
 
 export const getArticlesId = async (req, res) => {
   try {
-    const result = await (
-      await Article.find({}, { _id: 1, category: 1 })
-    ).reverse();
-
+    const articles = await Article.find({}).lean();
+    const result = articles.map((e) => ({
+      _id: e._id,
+      category: e.category,
+    }));
     res.status(201).json(result);
+    console.log(result);
   } catch (err) {
     res.status(409).json({ message: err.message });
   }
@@ -79,18 +80,14 @@ export const getArticlesId = async (req, res) => {
 
 export const getTrendingArticles = async (req, res) => {
   try {
-    const result = await await Article.find(
-      {},
-      { _id: 1, category: 1, views: 1 }
-    ).lean();
-
-    const sortedResult = result
+    const articles = await Article.find({}).lean();
+    const sortedResult = articles
       .map((e) => ({
-        ...e,
-        views: e.views.length,
+        _id: e._id,
+        category: e.category,
+        views: views.length,
       }))
-      .sort((a, b) => (a.views > b.views ? -1 : b.views > a.views ? 1 : 0))
-      .slice(0, 10);
+      .sort((a, b) => (a.views > b.views ? -1 : b.views > a.views ? 1 : 0));
 
     res.status(201).json(sortedResult);
   } catch (err) {
@@ -133,7 +130,7 @@ export const likeArticle = async (req, res) => {
 export const deleteArticle = async (req, res) => {
   try {
     const { articleId } = req.params;
-    const article = await Article.findOneAndDelete({ articleId });
+    const article = await Article.findOneAndDelete({ _id: articleId });
     if (!article) {
       return res.status(404).json({ error: "Article not found" });
     }
