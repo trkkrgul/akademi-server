@@ -66,7 +66,7 @@ export const getArticlesById = async (req, res) => {
 
 export const getArticlesId = async (req, res) => {
   try {
-    const articles = await Article.find({}).lean();
+    const articles = await Article.find({}).sort({ createdAt: -1 }).lean();
     const result = articles.map((e) => ({
       _id: e._id,
       category: e.category,
